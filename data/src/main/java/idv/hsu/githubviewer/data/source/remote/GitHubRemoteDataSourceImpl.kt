@@ -11,9 +11,14 @@ import javax.inject.Inject
 class GitHubRemoteDataSourceImpl @Inject constructor(
     private val api: GitHubApi
 ) : GitHubRemoteDataSource {
-    override fun getUser(since: Int, perPage: Int?): Flow<ApiResultWrapper<List<UserDto>>> =
+    override fun getUsers(since: Int, perPage: Int?): Flow<ApiResultWrapper<List<UserDto>>> =
         safeApiCall {
             api.getUsers(since, perPage)
+        }
+
+    override fun getUserById(id: String): Flow<ApiResultWrapper<UserDto>> =
+        safeApiCall {
+            api.getUserById(id)
         }
 
     override fun getRepositories(

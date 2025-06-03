@@ -9,6 +9,6 @@ import javax.inject.Inject
 class GetUserUseCase @Inject constructor(
     private val repository: GitHubRepository
 ) {
-    operator fun invoke(since: Int, perPage: Int?): Flow<DomainResult<List<User>>> =
+    operator fun invoke(since: Int, perPage: Int? = null): Flow<DomainResult<List<User>>> =
         repository.getUsers(since, perPage)
 }

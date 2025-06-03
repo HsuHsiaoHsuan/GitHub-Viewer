@@ -1,0 +1,2 @@
+1. Please use Android Meerkat or newer to build this project. (newer than AGP 8.10.1)
+2. Vectors and icons for the avatar placeholder are provided by <a href="https://www.svgrepo.com" target="_blank">SVG Repo</a>

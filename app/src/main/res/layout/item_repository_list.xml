@@ -1,0 +1,60 @@
+<?xml version="1.0" encoding="utf-8"?>
+<androidx.constraintlayout.widget.ConstraintLayout xmlns:android="http://schemas.android.com/apk/res/android"
+    xmlns:app="http://schemas.android.com/apk/res-auto"
+    xmlns:tools="http://schemas.android.com/tools"
+    android:layout_width="match_parent"
+    android:layout_height="wrap_content"
+    android:clickable="true"
+    android:focusable="true"
+    android:foreground="?android:attr/selectableItemBackground"
+    android:paddingHorizontal="@dimen/user_list_item_padding_horizontal"
+    android:paddingVertical="@dimen/user_list_item_padding_vertical">
+
+    <TextView
+        android:id="@+id/text_repository_title"
+        android:layout_width="0dp"
+        android:layout_height="wrap_content"
+        android:ellipsize="end"
+        android:lines="1"
+        android:textSize="@dimen/profile_repo_title_text_size"
+        android:textStyle="bold"
+        app:layout_constraintEnd_toEndOf="parent"
+        app:layout_constraintStart_toStartOf="parent"
+        app:layout_constraintTop_toTopOf="parent" />
+
+    <TextView
+        android:id="@+id/text_repository_star_count"
+        android:layout_width="0dp"
+        android:layout_height="wrap_content"
+        android:gravity="center_vertical"
+        android:textSize="@dimen/profile_repo_star_count_text_size"
+        app:drawableStartCompat="@drawable/ic_start"
+        app:layout_constraintEnd_toStartOf="@+id/text_repository_language"
+        app:layout_constraintHorizontal_chainStyle="spread"
+        app:layout_constraintStart_toStartOf="parent"
+        app:layout_constraintTop_toBottomOf="@id/text_repository_title" />
+
+    <TextView
+        android:id="@+id/text_repository_language"
+        android:layout_width="0dp"
+        android:layout_height="wrap_content"
+        android:gravity="center_vertical"
+        android:textSize="@dimen/profile_repo_language_text_size"
+        app:drawableStartCompat="@drawable/ic_language"
+        app:layout_constraintEnd_toEndOf="parent"
+        app:layout_constraintStart_toEndOf="@id/text_repository_star_count"
+        app:layout_constraintTop_toBottomOf="@id/text_repository_title" />
+
+    <TextView
+        android:id="@+id/text_repository_description"
+        android:layout_width="0dp"
+        android:layout_height="wrap_content"
+        android:lineSpacingExtra="6dp"
+        android:lines="3"
+        android:textSize="@dimen/profile_repo_description_text_size"
+        app:layout_constraintEnd_toEndOf="parent"
+        app:layout_constraintStart_toStartOf="parent"
+        app:layout_constraintTop_toBottomOf="@id/text_repository_star_count"
+        tools:text="A web application for managing personal finances, including budgeting, expense tracking." />
+
+</androidx.constraintlayout.widget.ConstraintLayout>

@@ -23,3 +23,4 @@ rootProject.name = "GitHubViewer"
 include(":app")
 include(":domain")
 include(":data")
+include(":core")

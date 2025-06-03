@@ -11,10 +11,10 @@ class GetRepositoryUseCase @Inject constructor(
 ) {
     operator fun invoke(
         username: String,
-        type: String?,
-        sort: String?,
-        direction: String?,
-        perPage: Int?
+        type: String? = null,
+        sort: String? = null,
+        direction: String? = null,
+        perPage: Int? = null
     ): Flow<DomainResult<List<Repository>>> =
         repository.getRepositories(username, type, sort, direction, perPage)
 }
