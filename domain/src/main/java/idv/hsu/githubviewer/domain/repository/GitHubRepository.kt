@@ -1,11 +1,17 @@
 package idv.hsu.githubviewer.domain.repository
 
-import idv.hsu.githubviewer.domain.common.ResultWrapper
+import idv.hsu.githubviewer.domain.common.DomainResult
 import idv.hsu.githubviewer.domain.model.Repository
 import idv.hsu.githubviewer.domain.model.User
 import kotlinx.coroutines.flow.Flow
 
 interface GitHubRepository {
-    fun getUsers(): Flow<ResultWrapper<List<User>>>
-    fun getRepositories(username: String): Flow<ResultWrapper<List<Repository>>>
+    fun getUsers(since: Int, perPage: Int?): Flow<DomainResult<List<User>>>
+    fun getRepositories(
+        username: String,
+        type: String?,
+        sort: String?,
+        direction: String?,
+        perPage: Int?
+    ): Flow<DomainResult<List<Repository>>>
 }

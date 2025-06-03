@@ -1,3 +1,5 @@
+import java.util.Properties
+
 plugins {
     alias(libs.plugins.android.library)
     alias(libs.plugins.kotlin.android)
@@ -14,6 +16,17 @@ android {
 
         testInstrumentationRunner = "androidx.test.runner.AndroidJUnitRunner"
         consumerProguardFiles("consumer-rules.pro")
+
+
+        val prop = Properties().apply {
+            load(rootProject.file("local.properties").inputStream())
+        }
+        val githubApiToken = prop.getProperty("github_api_token")
+        if (githubApiToken.isNullOrBlank()) {
+            buildConfigField("String", "GITHUB_API_TOKEN", "\"\"")
+        } else {
+            buildConfigField("String", "GITHUB_API_TOKEN", "\"$githubApiToken\"")
+        }
     }
 
     buildTypes {
@@ -32,9 +45,14 @@ android {
     kotlinOptions {
         jvmTarget = "11"
     }
+    buildFeatures {
+        buildConfig = true
+    }
 }
 
 dependencies {
+
+    implementation(project(":domain"))
 
     implementation(libs.androidx.core.ktx)
     implementation(libs.androidx.appcompat)
