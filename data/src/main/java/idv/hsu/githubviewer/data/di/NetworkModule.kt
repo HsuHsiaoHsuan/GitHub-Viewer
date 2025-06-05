@@ -10,8 +10,7 @@ import dagger.hilt.InstallIn
 import dagger.hilt.android.qualifiers.ApplicationContext
 import dagger.hilt.components.SingletonComponent
 import idv.hsu.githubviewer.data.BuildConfig
-import idv.hsu.githubviewer.data.source.remote.GitHubApi
-import idv.hsu.githubviewer.domain.model.User
+import idv.hsu.githubviewer.data.source.remote.GitHubApiService
 import okhttp3.OkHttpClient
 import okhttp3.Request
 import okhttp3.logging.HttpLoggingInterceptor
@@ -65,5 +64,5 @@ object NetworkModule {
 
     @Singleton
     @Provides
-    fun provideApiService(retrofit: Retrofit): GitHubApi = retrofit.create(GitHubApi::class.java)
+    fun provideApiService(retrofit: Retrofit): GitHubApiService = retrofit.create(GitHubApiService::class.java)
 }

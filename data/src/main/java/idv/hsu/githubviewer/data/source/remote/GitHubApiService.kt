@@ -7,7 +7,7 @@ import retrofit2.http.GET
 import retrofit2.http.Path
 import retrofit2.http.Query
 
-interface GitHubApi {
+interface GitHubApiService {
 
     /**
      * https://docs.github.com/en/rest/users/users?apiVersion=2022-11-28#list-users
@@ -35,7 +35,8 @@ interface GitHubApi {
         @Path("username") username: String,
         @Query("type") type: String? = null,
         @Query("sort") sort: String? = null,
-        @Query("direction") direction: String? = null, // "asc" or "desc"
-        @Query("per_page") perPage: Int? = null
+        @Query("direction") direction: String? = null,
+        @Query("per_page") perPage: Int? = null,
+        @Query("page") page: Int? = null
     ): Response<List<RepositoryDto>>
 }

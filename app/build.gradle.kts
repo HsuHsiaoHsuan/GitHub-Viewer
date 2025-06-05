@@ -52,6 +52,7 @@ dependencies {
     implementation(libs.androidx.browser)
     implementation(libs.androidx.activity)
     implementation(libs.androidx.constraintlayout)
+    implementation(libs.androidx.paging)
     implementation(libs.androidx.recyclerview)
     implementation(libs.bundles.navigation)
     implementation(libs.coroutines)

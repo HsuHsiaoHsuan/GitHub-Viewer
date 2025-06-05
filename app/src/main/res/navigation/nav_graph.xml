@@ -7,7 +7,7 @@
 
     <fragment
         android:id="@+id/userListFragment"
-        android:name="idv.hsu.githubviewer.ui.userlist.UserListFragment"
+        android:name="idv.hsu.githubviewer.presentation.userlist.UserListFragment"
         android:label="User List"
         tools:layout="@layout/fragment_user_list">
         <action
@@ -17,12 +17,15 @@
 
     <fragment
         android:id="@+id/profileFragment"
-        android:name="idv.hsu.githubviewer.ui.profile.ProfileFragment"
+        android:name="idv.hsu.githubviewer.presentation.profile.ProfileFragment"
         android:label="Profile"
         tools:layout="@layout/fragment_profile">
         <argument
             android:name="user"
             app:argType="idv.hsu.githubviewer.domain.model.User" />
+        <argument
+            android:name="avatar_placeholder"
+            app:argType="integer" />
     </fragment>
 
 </navigation>

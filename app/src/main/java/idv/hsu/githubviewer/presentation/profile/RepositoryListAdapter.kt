@@ -1,16 +1,15 @@
-package idv.hsu.githubviewer.ui.profile
+package idv.hsu.githubviewer.presentation.profile
 
 import android.view.LayoutInflater
 import android.view.ViewGroup
+import androidx.paging.PagingDataAdapter
 import androidx.recyclerview.widget.DiffUtil
-import androidx.recyclerview.widget.ListAdapter
 import androidx.recyclerview.widget.RecyclerView
-import idv.hsu.githubviewer.R
 import idv.hsu.githubviewer.databinding.ItemRepositoryListBinding
 import idv.hsu.githubviewer.domain.model.Repository
 
 class RepositoryListAdapter(private val onClick: (Repository) -> Unit) :
-    ListAdapter<Repository, RepositoryListAdapter.RepositoryViewHolder>(RepositoryDiffCallback) {
+    PagingDataAdapter<Repository, RepositoryListAdapter.RepositoryViewHolder>(RepositoryDiffCallback) {
     override fun onCreateViewHolder(
         parent: ViewGroup,
         viewType: Int
@@ -25,7 +24,9 @@ class RepositoryListAdapter(private val onClick: (Repository) -> Unit) :
         position: Int
     ) {
         var repository = getItem(position)
-        holder.bind(repository)
+        if (repository != null) {
+            holder.bind(repository)
+        }
     }
 
     class RepositoryViewHolder(

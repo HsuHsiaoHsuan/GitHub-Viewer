@@ -37,6 +37,7 @@ android {
 
 dependencies {
 
+    implementation(libs.androidx.paging)
     implementation(libs.coroutines)
     implementation(libs.hilt)
     ksp(libs.hilt.compiler)
