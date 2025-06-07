@@ -19,6 +19,7 @@ import androidx.paging.PagingData
 import dagger.hilt.android.AndroidEntryPoint
 import idv.hsu.githubviewer.databinding.FragmentUserListBinding
 import kotlinx.coroutines.Job
+import kotlinx.coroutines.delay
 import kotlinx.coroutines.flow.collectLatest
 import kotlinx.coroutines.launch
 
@@ -30,7 +31,7 @@ class UserListFragment : Fragment() {
 
     private val viewModel: UserListViewModel by viewModels()
     private lateinit var userListAdapter: UserListAdapter
-    private var pagingJob: Job? = null
+    private var debounceJob: Job? = null
 
     override fun onCreateView(
         inflater: LayoutInflater, container: ViewGroup?,
@@ -44,8 +45,8 @@ class UserListFragment : Fragment() {
         super.onViewCreated(view, savedInstanceState)
 
         setupMainRecyclerView()
-
         startPaging()
+        setupSearchFunction()
 
         viewLifecycleOwner.lifecycleScope.launch {
             viewLifecycleOwner.repeatOnLifecycle(Lifecycle.State.CREATED) {
@@ -70,19 +71,40 @@ class UserListFragment : Fragment() {
             }
         }
 
+
+    }
+
+    private fun startPaging() {
+        debounceJob?.cancel()
+        debounceJob = viewLifecycleOwner.lifecycleScope.launch {
+            viewModel.users.collectLatest { pagingData ->
+                userListAdapter.submitData(pagingData)
+            }
+        }
+        viewModel.sendIntent(UserListUiIntent.FetchData())
+    }
+
+    private fun setupSearchFunction() {
         binding.textInput.addTextChangedListener(object : TextWatcher {
             override fun afterTextChanged(s: Editable?) {
                 val keyword = s.toString().trim()
-                if (keyword.isEmpty()) {
-                    startPaging()
-                } else {
-                    pagingJob?.cancel()
-                    val filteredList = userListAdapter.snapshot()
-                        .filterNotNull()
-                        .filter { it.login.contains(keyword, ignoreCase = true) }
+                debounceJob?.cancel()
+                debounceJob = viewLifecycleOwner.lifecycleScope.launch {
+                    delay(300)
+                    if (keyword.isEmpty()) {
+                        binding.groupSearchEmpty.isVisible = false
+                        startPaging()
+                    } else {
+                        debounceJob?.cancel()
+                        val filteredList = userListAdapter.snapshot()
+                            .filterNotNull()
+                            .filter { it.login.contains(keyword, ignoreCase = true) }
 
-                    lifecycleScope.launch {
-                        userListAdapter.submitData(PagingData.from(filteredList))
+                        binding.groupSearchEmpty.isVisible = filteredList.isEmpty()
+
+                        lifecycleScope.launch {
+                            userListAdapter.submitData(PagingData.from(filteredList))
+                        }
                     }
                 }
             }
@@ -90,16 +112,6 @@ class UserListFragment : Fragment() {
             override fun beforeTextChanged(s: CharSequence?, start: Int, count: Int, after: Int) {}
             override fun onTextChanged(s: CharSequence?, start: Int, before: Int, count: Int) {}
         })
-    }
-
-    private fun startPaging() {
-        pagingJob?.cancel()
-        pagingJob = viewLifecycleOwner.lifecycleScope.launch {
-            viewModel.users.collectLatest { pagingData ->
-                userListAdapter.submitData(pagingData)
-            }
-        }
-        viewModel.sendIntent(UserListUiIntent.FetchData())
     }
 
     override fun onDestroyView() {

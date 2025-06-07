@@ -7,7 +7,7 @@
     android:clickable="true"
     android:focusable="true"
     android:foreground="?android:attr/selectableItemBackground"
-    android:paddingHorizontal="@dimen/user_list_item_padding_horizontal"
+    android:paddingHorizontal="@dimen/user_list_horizontal_space"
     android:paddingVertical="@dimen/user_list_item_padding_vertical">
 
     <TextView

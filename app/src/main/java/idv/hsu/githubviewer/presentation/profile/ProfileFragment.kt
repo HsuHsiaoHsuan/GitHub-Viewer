@@ -63,7 +63,7 @@ class ProfileFragment : Fragment() {
                                 .into(binding.imageAvatar)
                             binding.textName.text = state.user.name
                             binding.textLoginName.text =
-                                getString(R.string.text_login_name_format, state.user.login)
+                                getString(R.string.format_login_name, state.user.login)
                             binding.textFollowersCount.text = state.user.followers.toString()
                             binding.textFollowingCount.text = state.user.following.toString()
                         }
