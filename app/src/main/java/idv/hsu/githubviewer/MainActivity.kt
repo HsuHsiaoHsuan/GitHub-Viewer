@@ -30,7 +30,7 @@ class MainActivity : AppCompatActivity() {
             insets
         }
         setSupportActionBar(binding.toolbar)
-        val color = ContextCompat.getColor(this, R.color.grey) // 獲取 Toolbar 顏色
+        val color = ContextCompat.getColor(this, R.color.grey)
         window.statusBarColor = color // DEPRECATED
 
         val navHostFragment = supportFragmentManager

@@ -2,7 +2,6 @@ package idv.hsu.githubviewer.data.dto
 
 import com.squareup.moshi.Json
 import com.squareup.moshi.JsonClass
-import idv.hsu.githubviewer.domain.model.User
 
 @JsonClass(generateAdapter = true)
 data class UserDto(

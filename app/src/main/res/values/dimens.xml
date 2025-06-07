@@ -5,6 +5,9 @@
     <dimen name="user_list_item_padding_horizontal">16dp</dimen>
     <dimen name="user_list_item_name_text_size">16sp</dimen>
     <dimen name="user_list_item_name_margin_start">16dp</dimen>
+    <dimen name="user_list_search_padding_horizontal">16dp</dimen>
+    <dimen name="user_list_search_padding_vertical">12dp</dimen>
+    <dimen name="user_list_search_radium">28dp</dimen>
 
     <dimen name="profile_avatar_size">128dp</dimen>
     <dimen name="profile_avatar_margin_top">16dp</dimen>

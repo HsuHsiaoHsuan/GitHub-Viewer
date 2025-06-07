@@ -1,6 +1,8 @@
 package idv.hsu.githubviewer.presentation.userlist
 
 import android.os.Bundle
+import android.text.Editable
+import android.text.TextWatcher
 import android.view.LayoutInflater
 import android.view.View
 import android.view.ViewGroup
@@ -13,8 +15,10 @@ import androidx.lifecycle.lifecycleScope
 import androidx.lifecycle.repeatOnLifecycle
 import androidx.navigation.fragment.findNavController
 import androidx.paging.LoadState
+import androidx.paging.PagingData
 import dagger.hilt.android.AndroidEntryPoint
 import idv.hsu.githubviewer.databinding.FragmentUserListBinding
+import kotlinx.coroutines.Job
 import kotlinx.coroutines.flow.collectLatest
 import kotlinx.coroutines.launch
 
@@ -25,9 +29,8 @@ class UserListFragment : Fragment() {
     private val binding get() = _binding!!
 
     private val viewModel: UserListViewModel by viewModels()
-
     private lateinit var userListAdapter: UserListAdapter
-//    private lateinit var searchResultsAdapter: SearchResultsAdapter
+    private var pagingJob: Job? = null
 
     override fun onCreateView(
         inflater: LayoutInflater, container: ViewGroup?,
@@ -41,13 +44,8 @@ class UserListFragment : Fragment() {
         super.onViewCreated(view, savedInstanceState)
 
         setupMainRecyclerView()
-        setupSearchFunction()
 
-        viewLifecycleOwner.lifecycleScope.launch {
-            viewModel.users.collectLatest { pagingData ->
-                userListAdapter.submitData(pagingData)
-            }
-        }
+        startPaging()
 
         viewLifecycleOwner.lifecycleScope.launch {
             viewLifecycleOwner.repeatOnLifecycle(Lifecycle.State.CREATED) {
@@ -60,7 +58,7 @@ class UserListFragment : Fragment() {
                         ?: loadStates.source.prepend as? LoadState.Error
                         ?: loadStates.append as? LoadState.Error
                         ?: loadStates.prepend as? LoadState.Error
-                        ?: loadStates.refresh as? LoadState.Error // 也包含 refresh 錯誤
+                        ?: loadStates.refresh as? LoadState.Error
                     errorState?.let {
                         Toast.makeText(
                             requireContext(),
@@ -72,8 +70,36 @@ class UserListFragment : Fragment() {
             }
         }
 
-        viewModel.sendIntent(UserListUiIntent.FetchData())
+        binding.textInput.addTextChangedListener(object : TextWatcher {
+            override fun afterTextChanged(s: Editable?) {
+                val keyword = s.toString().trim()
+                if (keyword.isEmpty()) {
+                    startPaging()
+                } else {
+                    pagingJob?.cancel()
+                    val filteredList = userListAdapter.snapshot()
+                        .filterNotNull()
+                        .filter { it.login.contains(keyword, ignoreCase = true) }
 
+                    lifecycleScope.launch {
+                        userListAdapter.submitData(PagingData.from(filteredList))
+                    }
+                }
+            }
+
+            override fun beforeTextChanged(s: CharSequence?, start: Int, count: Int, after: Int) {}
+            override fun onTextChanged(s: CharSequence?, start: Int, before: Int, count: Int) {}
+        })
+    }
+
+    private fun startPaging() {
+        pagingJob?.cancel()
+        pagingJob = viewLifecycleOwner.lifecycleScope.launch {
+            viewModel.users.collectLatest { pagingData ->
+                userListAdapter.submitData(pagingData)
+            }
+        }
+        viewModel.sendIntent(UserListUiIntent.FetchData())
     }
 
     override fun onDestroyView() {
@@ -96,9 +122,5 @@ class UserListFragment : Fragment() {
         binding.recyclerView.adapter = userListAdapter.withLoadStateFooter(
             footer = UserLoadStateAdapter { userListAdapter.retry() }
         )
-    }
-
-    private fun setupSearchFunction() {
-        binding.searchView.setupWithSearchBar(binding.searchBar)
     }
 }

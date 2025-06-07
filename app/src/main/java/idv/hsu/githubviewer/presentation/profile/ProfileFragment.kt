@@ -114,7 +114,6 @@ class ProfileFragment : Fragment() {
     private fun setRepositoryListAdapter() {
         repositoryListAdapter = RepositoryListAdapter { repository ->
             repository.htmlUrl.let { url ->
-                // FIXME 實機會自動打開 Chrome，但模擬器不會
                 val customTabsIntent =
                     androidx.browser.customtabs.CustomTabsIntent.Builder().build()
                 customTabsIntent.launchUrl(requireContext(), url.toUri())
