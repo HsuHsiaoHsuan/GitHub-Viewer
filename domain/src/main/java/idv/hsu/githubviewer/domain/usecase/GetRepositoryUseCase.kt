@@ -1,6 +1,7 @@
 package idv.hsu.githubviewer.domain.usecase
 
-import idv.hsu.githubviewer.domain.common.DomainResult
+import androidx.paging.PagingData
+import idv.hsu.githubviewer.domain.model.GetRepositoryRequestParams
 import idv.hsu.githubviewer.domain.model.Repository
 import idv.hsu.githubviewer.domain.repository.GitHubRepository
 import kotlinx.coroutines.flow.Flow
@@ -10,11 +11,14 @@ class GetRepositoryUseCase @Inject constructor(
     private val repository: GitHubRepository
 ) {
     operator fun invoke(
-        username: String,
-        type: String?,
-        sort: String?,
-        direction: String?,
-        perPage: Int?
-    ): Flow<DomainResult<List<Repository>>> =
-        repository.getRepositories(username, type, sort, direction, perPage)
+        params: GetRepositoryRequestParams
+    ): Flow<PagingData<Repository>> =
+        repository.getRepositoriesStream(
+            username = params.username,
+            type = params.type,
+            sort = params.sort,
+            direction = params.direction,
+            perPage = params.perPage,
+            page = params.page
+        )
 }

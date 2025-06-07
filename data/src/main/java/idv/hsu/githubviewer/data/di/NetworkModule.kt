@@ -10,7 +10,7 @@ import dagger.hilt.InstallIn
 import dagger.hilt.android.qualifiers.ApplicationContext
 import dagger.hilt.components.SingletonComponent
 import idv.hsu.githubviewer.data.BuildConfig
-import idv.hsu.githubviewer.data.source.remote.GitHubApi
+import idv.hsu.githubviewer.data.source.remote.GitHubApiService
 import okhttp3.OkHttpClient
 import okhttp3.Request
 import okhttp3.logging.HttpLoggingInterceptor
@@ -38,13 +38,16 @@ object NetworkModule {
     @Singleton
     @Provides
     fun provideOkHttpClient(httpLoggingInterceptor: HttpLoggingInterceptor): OkHttpClient {
-        return OkHttpClient.Builder().addInterceptor(httpLoggingInterceptor)
+        return OkHttpClient.Builder()
+            .addInterceptor(httpLoggingInterceptor)
             .addInterceptor { chain ->
                 val original: Request = chain.request()
                 val requestBuilder: Request.Builder =
-                    original.newBuilder().header("Accept", "application/vnd.github+json")
-                        .header("X-GitHub-Api-Version:", "2022-11-28")
-                        .header("Authorization", "Bearer $GITHUB_TOKEN}")
+                    original.newBuilder()
+                        .header("Accept", "application/vnd.github+json")
+                        .header("X-GitHub-Api-Version", "2022-11-28")
+                        .header("Authorization", "Bearer $GITHUB_TOKEN")
+                        .header("User-Agent", "Hsu,Hsiao-Hsuan")
                 val request: Request = requestBuilder.build()
                 chain.proceed(request)
             }.build()
@@ -61,5 +64,5 @@ object NetworkModule {
 
     @Singleton
     @Provides
-    fun provideApiService(retrofit: Retrofit): GitHubApi = retrofit.create(GitHubApi::class.java)
+    fun provideApiService(retrofit: Retrofit): GitHubApiService = retrofit.create(GitHubApiService::class.java)
 }

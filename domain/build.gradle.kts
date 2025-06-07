@@ -3,6 +3,7 @@ plugins {
     alias(libs.plugins.kotlin.android)
     alias(libs.plugins.hilt.android)
     alias(libs.plugins.ksp)
+    id("kotlin-parcelize")
 }
 
 android {
@@ -36,6 +37,7 @@ android {
 
 dependencies {
 
+    implementation(libs.androidx.paging)
     implementation(libs.coroutines)
     implementation(libs.hilt)
     ksp(libs.hilt.compiler)

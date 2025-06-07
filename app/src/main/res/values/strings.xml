@@ -1,3 +1,15 @@
 <resources>
     <string name="app_name">GitHubViewer</string>
+
+    <string name="avatar_description">User Avatar</string>
+
+    <string name="text_followers_label">Followers</string>
+    <string name="text_following_label">Following</string>
+    <string name="text_login_name_format">\@%s</string>
+    <string name="text_placeholder">-</string>
+    <string name="text_repository_label">Repositories</string>
+
+    <string name="user_list_search_hint">Search users…</string>
+
+
 </resources>
