@@ -9,16 +9,20 @@ coreKtx = "1.16.0"
 espressoCore = "3.6.1"
 glide = "4.16.0"
 hilt = "2.56.2"
-junit = "4.13.2"
-junitVersion = "1.2.1"
+#junit = "4.13.2"
+#junitVersion = "1.2.1"
+junit5 = "5.13.1"
+junit5-plugin = "1.11.2.0"
 ksp = "2.1.21-2.0.1"
 kotlin = "2.1.21"
 lifecycle = "2.9.1"
 material = "1.12.0"
+mockk = "1.14.2"
 moshi = "1.15.2"
 navigation = "2.9.0"
 okhttp = "4.12.0"
 paging = "3.3.6"
+paging-testing = "3.3.6"
 recyclerview = "1.4.0"
 retrofit = "3.0.0"
 
@@ -30,16 +34,22 @@ androidx-browser = { group = "androidx.browser", name = "browser", version.ref =
 androidx-constraintlayout = { group = "androidx.constraintlayout", name = "constraintlayout", version.ref = "constraintlayout" }
 androidx-core-ktx = { group = "androidx.core", name = "core-ktx", version.ref = "coreKtx" }
 androidx-espresso-core = { group = "androidx.test.espresso", name = "espresso-core", version.ref = "espressoCore" }
-androidx-junit = { group = "androidx.test.ext", name = "junit", version.ref = "junitVersion" }
+#androidx-junit = { group = "androidx.test.ext", name = "junit", version.ref = "junitVersion" }
 androidx-paging = { group = "androidx.paging", name = "paging-runtime-ktx", version.ref = "paging" }
+androidx-paging-testing = { group = "androidx.paging", name = "paging-testing", version.ref = "paging-testing" }
 androidx-recyclerview = { group = "androidx.recyclerview", name = "recyclerview", version.ref = "recyclerview" }
 coroutines = { group = "org.jetbrains.kotlinx", name = "kotlinx-coroutines-android", version.ref = "coroutines" }
+coroutines-test = { group = "org.jetbrains.kotlinx", name = "kotlinx-coroutines-test", version.ref = "coroutines" }
 glide = { group = "com.github.bumptech.glide", name = "glide", version.ref = "glide" }
 hilt = { group = "com.google.dagger", name = "hilt-android", version.ref = "hilt" }
 hilt-compiler = { group = "com.google.dagger", name = "hilt-android-compiler", version.ref = "hilt" }
-junit = { group = "junit", name = "junit", version.ref = "junit" }
+#junit = { group = "junit", name = "junit", version.ref = "junit" }
+junit5-api = { group = "org.junit.jupiter", name = "junit-jupiter-api", version.ref = "junit5" }
+junit5-engine = { group = "org.junit.jupiter", name = "junit-jupiter-engine", version.ref = "junit5" }
 lifecycle-viewmodel = { group = "androidx.lifecycle", name = "lifecycle-viewmodel-ktx", version.ref = "lifecycle" }
 material = { group = "com.google.android.material", name = "material", version.ref = "material" }
+mockk = { group = "io.mockk", name = "mockk", version.ref = "mockk" }
+mockk-android = { group = "io.mockk", name = "mockk-android", version.ref = "mockk"}
 moshi-codegen = { group = "com.squareup.moshi", name = "moshi-kotlin-codegen", version.ref = "moshi"}
 moshi-converter = { group = "com.squareup.retrofit2", name = "converter-moshi", version.ref = "retrofit"}
 moshi-kotlin = { group = "com.squareup.moshi", name = "moshi-kotlin", version.ref = "moshi"}
@@ -54,8 +64,8 @@ retrofit = { group = "com.squareup.retrofit2", name = "retrofit", version.ref = 
 android-application = { id = "com.android.application", version.ref = "agp" }
 android-library = { id = "com.android.library", version.ref = "agp" }
 kotlin-android = { id = "org.jetbrains.kotlin.android", version.ref = "kotlin" }
-kotlin-parcelize = { id = "org.jetbrains.kotlin.plugin.parcelize", version = "kotlin" }
 hilt-android = { id = "com.google.dagger.hilt.android", version.ref = "hilt"}
+android-junit5 = { id = "de.mannodermaus.android-junit5", version.ref = "junit5-plugin"}
 ksp = { id = "com.google.devtools.ksp", version.ref = "ksp" }
 safeargs-kotlin = { id = "androidx.navigation.safeargs.kotlin", version.ref = "navigation" }
 
