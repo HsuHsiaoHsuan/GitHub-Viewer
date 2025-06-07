@@ -23,7 +23,7 @@
         android:layout_height="wrap_content"
         android:layout_marginHorizontal="@dimen/profile_margin_horizontal"
         android:layout_marginTop="@dimen/profile_name_margin_top"
-        android:text="@string/text_placeholder"
+        android:text="@string/label_placeholder"
         android:textAlignment="center"
         android:textSize="@dimen/profile_name_text_size"
         android:textStyle="bold"
@@ -37,7 +37,7 @@
         android:layout_width="0dp"
         android:layout_height="wrap_content"
         android:layout_marginHorizontal="@dimen/profile_margin_horizontal"
-        android:text="@string/text_placeholder"
+        android:text="@string/label_placeholder"
         android:textAlignment="center"
         android:textColor="@color/lynch"
         android:textSize="@dimen/profile_login_name_text_size"
@@ -66,7 +66,7 @@
 
         <TextView
             style="@style/RepoUserFollowLabel"
-            android:text="@string/text_followers_label" />
+            android:text="@string/label_followers" />
 
     </LinearLayout>
 
@@ -89,7 +89,7 @@
 
         <TextView
             style="@style/RepoUserFollowLabel"
-            android:text="@string/text_following_label" />
+            android:text="@string/label_following" />
 
     </LinearLayout>
 
@@ -106,7 +106,7 @@
         android:layout_height="wrap_content"
         android:layout_marginHorizontal="@dimen/profile_margin_horizontal"
         android:layout_marginTop="@dimen/profile_repo_margin_top"
-        android:text="@string/text_repository_label"
+        android:text="@string/label_repository"
         android:textSize="@dimen/profile_repo_text_size"
         android:textStyle="bold"
         app:layout_constraintEnd_toEndOf="parent"

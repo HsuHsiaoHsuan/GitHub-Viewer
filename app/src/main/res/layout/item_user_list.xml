@@ -7,14 +7,14 @@
     android:clickable="true"
     android:focusable="true"
     android:foreground="?android:attr/selectableItemBackground"
-    android:paddingHorizontal="@dimen/user_list_item_padding_horizontal"
+    android:paddingHorizontal="@dimen/user_list_horizontal_space"
     android:paddingVertical="@dimen/user_list_item_padding_vertical">
 
     <com.google.android.material.imageview.ShapeableImageView
         android:id="@+id/image_avatar"
         android:layout_width="@dimen/user_list_item_avatar_size"
         android:layout_height="@dimen/user_list_item_avatar_size"
-        android:contentDescription="@string/avatar_description"
+        android:contentDescription="@string/description_avatar"
         app:layout_constraintBottom_toBottomOf="parent"
         app:layout_constraintStart_toStartOf="parent"
         app:layout_constraintTop_toTopOf="parent"
