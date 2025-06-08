@@ -31,7 +31,6 @@ class MainActivity : AppCompatActivity() {
         }
         setSupportActionBar(binding.toolbar)
         val color = ContextCompat.getColor(this, R.color.grey)
-        window.statusBarColor = color // DEPRECATED
 
         val navHostFragment = supportFragmentManager
             .findFragmentById(R.id.nav_host_fragment) as NavHostFragment

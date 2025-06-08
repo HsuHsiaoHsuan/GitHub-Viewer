@@ -52,8 +52,6 @@ class UserListFragment : Fragment() {
             viewLifecycleOwner.repeatOnLifecycle(Lifecycle.State.STARTED) {
                 userListAdapter.loadStateFlow.collectLatest { loadStates ->
                     binding.progressBar.isVisible = loadStates.refresh is LoadState.Loading
-//                    binding.retryButton.isVisible = loadStates.refresh is LoadState.Error
-                    // 可以在畫面加上 retryButton
 
                     val errorState = loadStates.source.append as? LoadState.Error
                         ?: loadStates.source.prepend as? LoadState.Error
