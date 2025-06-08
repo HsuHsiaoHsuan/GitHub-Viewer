@@ -1,3 +1,8 @@
-1. Please create the variable `github_api_token` in file `local.properties`, and fill in the API KEY
-2. Support Android Meerkat or newer to build this project.(to use newer AGP version than 8.10.1)
-3. Vectors for the avatar placeholder are provided by <a href="https://www.svgrepo.com" target="_blank">SVG Repo</a>
+1. Please create the variable `github_api_token` in the `local.properties` file and enter your API key.
+2. This project supports Android Meerkat or newer (requires AGP version newer than 8.10.1).
+3. Avatar placeholder vectors are provided by [SVG Repo](https://www.svgrepo.com).
+4. Four modules: app, domain, data, and core.
+   a. `app`: Handles all Android and UI code
+   b. `domain`: Pure business logic and use-cases.
+   c. `data`: Implements repositories, network API calls, , and DTO ↔ Entity mapping. Encapsulates all data sources.
+   d. `core`: Provides shared utilities to avoid duplication.
