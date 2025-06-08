@@ -49,7 +49,7 @@ class UserListFragment : Fragment() {
         setupSearchFunction()
 
         viewLifecycleOwner.lifecycleScope.launch {
-            viewLifecycleOwner.repeatOnLifecycle(Lifecycle.State.CREATED) {
+            viewLifecycleOwner.repeatOnLifecycle(Lifecycle.State.STARTED) {
                 userListAdapter.loadStateFlow.collectLatest { loadStates ->
                     binding.progressBar.isVisible = loadStates.refresh is LoadState.Loading
 //                    binding.retryButton.isVisible = loadStates.refresh is LoadState.Error
