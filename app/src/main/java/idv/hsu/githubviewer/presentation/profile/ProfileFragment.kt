@@ -48,7 +48,7 @@ class ProfileFragment : Fragment() {
         binding.imageAvatar.setImageResource(args.avatarPlaceholder)
 
         viewLifecycleOwner.lifecycleScope.launch {
-            viewLifecycleOwner.repeatOnLifecycle(Lifecycle.State.CREATED) {
+            viewLifecycleOwner.repeatOnLifecycle(Lifecycle.State.STARTED) {
                 viewModel.stateFlow.collect { state ->
                     when (state) {
                         is ProfileListUiState.Idle -> Unit
@@ -81,7 +81,7 @@ class ProfileFragment : Fragment() {
         }
 
         viewLifecycleOwner.lifecycleScope.launch {
-            viewLifecycleOwner.repeatOnLifecycle(Lifecycle.State.CREATED) {
+            viewLifecycleOwner.repeatOnLifecycle(Lifecycle.State.STARTED) {
                 repositoryListAdapter.loadStateFlow.collectLatest { loadStates ->
                     binding.progressBar.isVisible =
                         loadStates.refresh is androidx.paging.LoadState.Loading
