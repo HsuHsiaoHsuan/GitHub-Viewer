@@ -15,19 +15,20 @@
     <dimen name="user_list_search_empty_message_line_spacing">2dp</dimen>
 
 
-    <dimen name="profile_avatar_size">128dp</dimen>
+    <dimen name="profile_avatar_collapsed_margin_end">8dp</dimen>
+    <dimen name="profile_avatar_collapsed_size">32dp</dimen>
     <dimen name="profile_avatar_margin_top">16dp</dimen>
+    <dimen name="profile_avatar_size">128dp</dimen>
     <dimen name="profile_follow_between_margin">6dp</dimen>
-    <dimen name="profile_login_name_text_size">16sp</dimen>
-    <dimen name="profile_name_text_size">22sp</dimen>
-    <dimen name="profile_name_margin_top">16dp</dimen>
-    <dimen name="profile_margin_horizontal">16dp</dimen>
-
-    <dimen name="profile_follow_margin_top">28dp</dimen>
-    <dimen name="profile_follow_padding">12dp</dimen>
     <dimen name="profile_follow_count_text_size">24sp</dimen>
     <dimen name="profile_follow_label_text_size">14sp</dimen>
-
+    <dimen name="profile_follow_margin_top">28dp</dimen>
+    <dimen name="profile_follow_padding">12dp</dimen>
+    <dimen name="profile_horizontal_space">16dp</dimen>
+    <dimen name="profile_login_name_text_size">16sp</dimen>
+    <dimen name="profile_name_margin_top">16dp</dimen>
+    <dimen name="profile_name_text_size">22sp</dimen>
+    <dimen name="profile_name_text_size_collapsed">18sp</dimen>
     <dimen name="profile_repo_description_text_size">14sp</dimen>
     <dimen name="profile_repo_language_text_size">14sp</dimen>
     <dimen name="profile_repo_margin_top">32dp</dimen>
