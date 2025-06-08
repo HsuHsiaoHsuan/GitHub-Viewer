@@ -4,6 +4,7 @@ import androidx.lifecycle.SavedStateHandle
 import androidx.lifecycle.viewModelScope
 import androidx.paging.PagingData
 import androidx.paging.cachedIn
+import androidx.paging.filter
 import dagger.hilt.android.lifecycle.HiltViewModel
 import idv.hsu.githubviewer.common.MVIViewModel
 import idv.hsu.githubviewer.core.DEFAULT_PER_PAGE
@@ -19,6 +20,7 @@ import kotlinx.coroutines.Job
 import kotlinx.coroutines.flow.Flow
 import kotlinx.coroutines.flow.MutableSharedFlow
 import kotlinx.coroutines.flow.flatMapLatest
+import kotlinx.coroutines.flow.map
 import kotlinx.coroutines.launch
 import javax.inject.Inject
 
@@ -49,7 +51,9 @@ class ProfileViewModel @Inject constructor(
                     perPage = it.perPage,
                     page = it.page
                 )
-            )
+            ).map { pageData ->
+                pageData.filter { it.fork == false }
+            }
         }
         .cachedIn(viewModelScope)
 
