@@ -1,7 +1,6 @@
 package idv.hsu.githubviewer.presentation.profile
 
 import android.os.Bundle
-import android.util.Log
 import android.view.LayoutInflater
 import android.view.View
 import android.view.ViewGroup
@@ -16,6 +15,7 @@ import androidx.lifecycle.repeatOnLifecycle
 import androidx.navigation.fragment.navArgs
 import com.bumptech.glide.Glide
 import com.bumptech.glide.load.resource.drawable.DrawableTransitionOptions
+import com.google.android.material.appbar.AppBarLayout
 import dagger.hilt.android.AndroidEntryPoint
 import idv.hsu.githubviewer.R
 import idv.hsu.githubviewer.databinding.FragmentProfileBinding
@@ -46,6 +46,8 @@ class ProfileFragment : Fragment() {
 
         setRepositoryListAdapter()
         binding.imageAvatar.setImageResource(args.avatarPlaceholder)
+        binding.imageAvatarCollapsed.setImageResource(args.avatarPlaceholder)
+        setOnOffsetChangedListener()
 
         viewLifecycleOwner.lifecycleScope.launch {
             viewLifecycleOwner.repeatOnLifecycle(Lifecycle.State.STARTED) {
@@ -54,14 +56,18 @@ class ProfileFragment : Fragment() {
                         is ProfileListUiState.Idle -> Unit
 
                         is ProfileListUiState.SuccessUser -> {
-                            Log.e("FREEMAN", "SuccessUser")
-                            // FIXME 切換深淺佈景主題，文字消失
                             Glide.with(binding.imageAvatar)
                                 .load(state.user.avatarUrl)
                                 .circleCrop()
                                 .transition(DrawableTransitionOptions.withCrossFade())
                                 .into(binding.imageAvatar)
+                            Glide.with(binding.imageAvatarCollapsed)
+                                .load(state.user.avatarUrl)
+                                .circleCrop()
+                                .transition(DrawableTransitionOptions.withCrossFade())
+                                .into(binding.imageAvatarCollapsed)
                             binding.textName.text = state.user.name
+                            binding.textNameCollapsed.text = state.user.name
                             binding.textLoginName.text =
                                 getString(R.string.format_login_name, state.user.login)
                             binding.textFollowersCount.text = state.user.followers.toString()
@@ -109,6 +115,46 @@ class ProfileFragment : Fragment() {
     override fun onDestroyView() {
         super.onDestroyView()
         _binding = null
+    }
+
+    private fun setOnOffsetChangedListener() {
+        val animateDuration = 200L
+        binding.appBarLayout.addOnOffsetChangedListener(AppBarLayout.OnOffsetChangedListener { appBar, verticalOffset ->
+            val totalScrollRange = appBar.totalScrollRange
+            val percentage = (kotlin.math.abs(verticalOffset).toFloat() / totalScrollRange)
+
+            if (percentage >= 0.8) {
+                with(binding.collapsedProfileHeader) {
+                    if (this.visibility != View.VISIBLE) {
+                        this.alpha = 0f
+                        this.visibility = View.VISIBLE
+                        this.animate().alpha(1f).duration = animateDuration
+                    }
+                }
+                setComponentAlpha(0f)
+            } else {
+                with(binding.collapsedProfileHeader) {
+                    if (this.visibility != View.GONE) {
+                        this.animate().alpha(0f).withEndAction {
+                            this.visibility = View.GONE
+                        }.duration = animateDuration
+                    }
+                }
+                setComponentAlpha(1f - percentage)
+                if (verticalOffset == 0) {
+                    setComponentAlpha(1f)
+                }
+            }
+        })
+    }
+
+    private fun setComponentAlpha(alpha: Float) {
+        binding.imageAvatar.alpha = alpha
+        binding.textName.alpha = alpha
+        binding.textLoginName.alpha = alpha
+        binding.layoutUserFollowers.alpha = alpha
+        binding.layoutUserFollowing.alpha = alpha
+        binding.textRepositoryTitle.alpha = alpha
     }
 
     private fun setRepositoryListAdapter() {
