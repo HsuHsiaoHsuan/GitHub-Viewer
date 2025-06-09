@@ -6,3 +6,8 @@
    * `domain`: Pure business logic and use-cases.
    * `data`: Implements repositories, network API calls, , and DTO ↔ Entity mapping. Encapsulates all data sources.
    * `core`: Provides shared utilities to avoid duplication.
+5. Screenshot:
+ <img src="screenshot/user_list.png" alt="user list" width="300">
+ <img src="screenshot/profile.png" alt="profile" width="300">
+ <img src="screenshot/profile_collapsed.png" alt="profile collapsed" width="300">
+ <img src="screenshot/inapp_custom_tab.png" alt="inapp custom tab" width="300">
