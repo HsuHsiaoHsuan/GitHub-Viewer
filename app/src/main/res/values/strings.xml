@@ -1,3 +1,17 @@
 <resources>
     <string name="app_name">GitHubViewer</string>
+
+    <string name="description_avatar">User Avatar</string>
+
+    <string name="format_login_name">\@%s</string>
+
+    <string name="hint_user_list_search">Search users…</string>
+
+    <string name="label_followers">Followers</string>
+    <string name="label_following">Following</string>
+    <string name="label_placeholder">-</string>
+    <string name="label_repository">Repositories</string>
+    <string name="label_search_empty_message">We couldn\'t find any users matching your search criteria. Please try a different search term or check your spelling.</string>
+    <string name="label_search_empty_title">No users found</string>
+
 </resources>
