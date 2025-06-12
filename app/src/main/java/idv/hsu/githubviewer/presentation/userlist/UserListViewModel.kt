@@ -1,5 +1,6 @@
 package idv.hsu.githubviewer.presentation.userlist
 
+import android.util.Log
 import androidx.lifecycle.viewModelScope
 import androidx.paging.PagingData
 import androidx.paging.cachedIn
@@ -22,8 +23,7 @@ class UserListViewModel @Inject constructor(
 ) : MVIViewModel<UserListUiIntent, UserListUiState>(
     initialUi = UserListUiState.Idle
 ) {
-    private val _loadUsersEvent = MutableSharedFlow<Pair<Int?, Int?>>()
-
+    private val _loadUsersEvent = MutableSharedFlow<Pair<Int?, Int?>>(replay = 1)
     @OptIn(ExperimentalCoroutinesApi::class)
     val users: Flow<PagingData<User>> = _loadUsersEvent
         .flatMapLatest {
@@ -31,16 +31,21 @@ class UserListViewModel @Inject constructor(
                 since = it.first ?: DEFAULT_START_USER_ID,
                 perPage = it.second ?: DEFAULT_PER_PAGE
             )
+
         }
         .cachedIn(viewModelScope)
 
     override suspend fun handleIntent(intent: UserListUiIntent) {
         when (intent) {
-            is UserListUiIntent.FetchData -> fetchUsers(intent.since, intent.perPage)
+            is UserListUiIntent.FetchData -> {
+                Log.e("UserListViewModel", "handleIntent: FetchData")
+                fetchUsers(intent.since, intent.perPage)
+            }
         }
     }
 
     private fun fetchUsers(since: Int?, perPage: Int?) {
+        Log.e("UserListViewModel", "fetchUsers: since: $since, perPage: $perPage")
         viewModelScope.launch {
             _loadUsersEvent.emit(Pair(since, perPage))
         }

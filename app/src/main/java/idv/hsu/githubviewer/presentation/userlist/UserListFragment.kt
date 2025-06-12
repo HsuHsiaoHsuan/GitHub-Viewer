@@ -3,12 +3,14 @@ package idv.hsu.githubviewer.presentation.userlist
 import android.os.Bundle
 import android.text.Editable
 import android.text.TextWatcher
+import android.util.Log
 import android.view.LayoutInflater
 import android.view.View
 import android.view.ViewGroup
 import android.widget.Toast
 import androidx.core.view.isVisible
 import androidx.fragment.app.Fragment
+import androidx.fragment.app.activityViewModels
 import androidx.fragment.app.viewModels
 import androidx.lifecycle.Lifecycle
 import androidx.lifecycle.lifecycleScope
@@ -29,7 +31,7 @@ class UserListFragment : Fragment() {
     private var _binding: FragmentUserListBinding? = null
     private val binding get() = _binding!!
 
-    private val viewModel: UserListViewModel by viewModels()
+    private val viewModel: UserListViewModel by activityViewModels()
     private lateinit var userListAdapter: UserListAdapter
     private var debounceJob: Job? = null
 
@@ -43,73 +45,15 @@ class UserListFragment : Fragment() {
 
     override fun onViewCreated(view: View, savedInstanceState: Bundle?) {
         super.onViewCreated(view, savedInstanceState)
+        Log.e("UserListFragment", "onViewCreated called")
 
         setupMainRecyclerView()
-        startPaging()
+        observeData()
         setupSearchFunction()
 
-        viewLifecycleOwner.lifecycleScope.launch {
-            viewLifecycleOwner.repeatOnLifecycle(Lifecycle.State.STARTED) {
-                userListAdapter.loadStateFlow.collectLatest { loadStates ->
-                    binding.progressBar.isVisible = loadStates.refresh is LoadState.Loading
-
-                    val errorState = loadStates.source.append as? LoadState.Error
-                        ?: loadStates.source.prepend as? LoadState.Error
-                        ?: loadStates.append as? LoadState.Error
-                        ?: loadStates.prepend as? LoadState.Error
-                        ?: loadStates.refresh as? LoadState.Error
-                    errorState?.let {
-                        Toast.makeText(
-                            requireContext(),
-                            "Error: ${it.error.localizedMessage}",
-                            Toast.LENGTH_LONG
-                        ).show()
-                    }
-                }
-            }
+        if (savedInstanceState == null) {
+            startPaging()
         }
-
-
-    }
-
-    private fun startPaging() {
-        debounceJob?.cancel()
-        debounceJob = viewLifecycleOwner.lifecycleScope.launch {
-            viewModel.users.collectLatest { pagingData ->
-                userListAdapter.submitData(pagingData)
-            }
-        }
-        viewModel.sendIntent(UserListUiIntent.FetchData())
-    }
-
-    private fun setupSearchFunction() {
-        binding.textInput.addTextChangedListener(object : TextWatcher {
-            override fun afterTextChanged(s: Editable?) {
-                val keyword = s.toString().trim()
-                debounceJob?.cancel()
-                debounceJob = viewLifecycleOwner.lifecycleScope.launch {
-                    delay(300)
-                    if (keyword.isEmpty()) {
-                        binding.groupSearchEmpty.isVisible = false
-                        startPaging()
-                    } else {
-                        debounceJob?.cancel()
-                        val filteredList = userListAdapter.snapshot()
-                            .filterNotNull()
-                            .filter { it.login.contains(keyword, ignoreCase = true) }
-
-                        binding.groupSearchEmpty.isVisible = filteredList.isEmpty()
-
-                        lifecycleScope.launch {
-                            userListAdapter.submitData(PagingData.from(filteredList))
-                        }
-                    }
-                }
-            }
-
-            override fun beforeTextChanged(s: CharSequence?, start: Int, count: Int, after: Int) {}
-            override fun onTextChanged(s: CharSequence?, start: Int, before: Int, count: Int) {}
-        })
     }
 
     override fun onDestroyView() {
@@ -133,4 +77,83 @@ class UserListFragment : Fragment() {
             footer = UserLoadStateAdapter { userListAdapter.retry() }
         )
     }
+
+    private fun observeData() {
+        viewLifecycleOwner.lifecycleScope.launch {
+            viewLifecycleOwner.repeatOnLifecycle(Lifecycle.State.CREATED) {
+                launch {
+                    viewLifecycleOwner.lifecycleScope.launch {
+                        viewModel.users.collectLatest { pagingData ->
+                            userListAdapter.submitData(pagingData)
+                        }
+                    }
+                }
+
+                launch {
+                    userListAdapter.loadStateFlow.collectLatest { loadStates ->
+                        binding.progressBar.isVisible = loadStates.refresh is LoadState.Loading
+
+                        val errorState = loadStates.source.append as? LoadState.Error
+                            ?: loadStates.source.prepend as? LoadState.Error
+                            ?: loadStates.append as? LoadState.Error
+                            ?: loadStates.prepend as? LoadState.Error
+                            ?: loadStates.refresh as? LoadState.Error
+                        errorState?.let {
+                            Toast.makeText(
+                                requireContext(),
+                                "Error: ${it.error.localizedMessage}",
+                                Toast.LENGTH_LONG
+                            ).show()
+                        }
+                    }
+                }
+            }
+        }
+    }
+
+    private fun startPaging() {
+//        debounceJob?.cancel()
+//        debounceJob = viewLifecycleOwner.lifecycleScope.launch {
+//            viewModel.users.collectLatest { pagingData ->
+//                userListAdapter.submitData(pagingData)
+//            }
+//        }
+        Log.e("UserListFragment", "startPaging called")
+        viewModel.sendIntent(UserListUiIntent.FetchData())
+    }
+
+    private fun setupSearchFunction() {
+        binding.textInput.addTextChangedListener(object : TextWatcher {
+            override fun afterTextChanged(s: Editable?) {
+                val keyword = s.toString().trim()
+                debounceJob?.cancel()
+                debounceJob = viewLifecycleOwner.lifecycleScope.launch {
+                    delay(SEARCH_DEBOUNCE_DELAY)
+                    if (keyword.isEmpty()) {
+                        binding.groupSearchEmpty.isVisible = false
+                        startPaging()
+                    } else {
+                        debounceJob?.cancel()
+                        val filteredList = userListAdapter.snapshot()
+                            .filterNotNull()
+                            .filter { it.login.contains(keyword, ignoreCase = true) }
+
+                        binding.groupSearchEmpty.isVisible = filteredList.isEmpty()
+
+                        lifecycleScope.launch {
+                            userListAdapter.submitData(PagingData.from(filteredList))
+                        }
+                    }
+                }
+            }
+
+            override fun beforeTextChanged(s: CharSequence?, start: Int, count: Int, after: Int) {}
+            override fun onTextChanged(s: CharSequence?, start: Int, before: Int, count: Int) {}
+        })
+    }
+
+    companion object {
+        private const val SEARCH_DEBOUNCE_DELAY = 300L
+    }
+
 }
