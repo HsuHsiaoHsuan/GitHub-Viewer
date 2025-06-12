@@ -61,6 +61,7 @@ dependencies {
     ksp(libs.hilt.compiler)
     implementation(libs.lifecycle.viewmodel)
     implementation(libs.material)
+    implementation(libs.timber)
 
     testImplementation(libs.junit5.api)
     testRuntimeOnly(libs.junit5.engine)
