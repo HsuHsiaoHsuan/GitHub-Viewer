@@ -127,10 +127,9 @@ class UserListFragment : Fragment() {
         }
         binding.recyclerView.apply {
             layoutManager = androidx.recyclerview.widget.LinearLayoutManager(context)
-            adapter = userListAdapter
+            adapter = userListAdapter.withLoadStateFooter(
+                footer = UserLoadStateAdapter { userListAdapter.retry() }
+            )
         }
-        binding.recyclerView.adapter = userListAdapter.withLoadStateFooter(
-            footer = UserLoadStateAdapter { userListAdapter.retry() }
-        )
     }
 }
