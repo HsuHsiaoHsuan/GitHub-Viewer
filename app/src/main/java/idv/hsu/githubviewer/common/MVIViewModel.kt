@@ -34,7 +34,7 @@ abstract class MVIViewModel<UiIntent, UiState>(
         }
     }
 
-    suspend fun setUiState(uiState: UiState) {
+    protected suspend fun setUiState(uiState: UiState) {
         _state.emit(uiState)
     }
 
