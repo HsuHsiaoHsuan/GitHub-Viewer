@@ -99,11 +99,10 @@ class UserListFragment : Fragment() {
     private fun setupMainRecyclerView() {
         binding.recyclerView.apply {
             layoutManager = androidx.recyclerview.widget.LinearLayoutManager(context)
-            adapter = userListAdapter
+            adapter = userListAdapter.withLoadStateFooter(
+                footer = UserListFooterAdapter { userListAdapter.retry() }
+            )
         }
-        binding.recyclerView.adapter = userListAdapter.withLoadStateFooter(
-            footer = UserLoadStateAdapter { userListAdapter.retry() }
-        )
     }
 
     private fun startFetchData() {
@@ -124,7 +123,7 @@ class UserListFragment : Fragment() {
                     startFetchData()
                 } else {
                     searchJob = viewLifecycleOwner.lifecycleScope.launch {
-                        delay(300)
+                        delay(SEARCH_DELAY_TIME)
                         if (viewModel.snapshotList == null) {
                             viewModel.sendIntent(
                                 UserListUiIntent.SetSnapShotList(userListAdapter.snapshot())
@@ -142,5 +141,9 @@ class UserListFragment : Fragment() {
             override fun beforeTextChanged(s: CharSequence?, start: Int, count: Int, after: Int) {}
             override fun onTextChanged(s: CharSequence?, start: Int, before: Int, count: Int) {}
         })
+    }
+
+    companion object {
+        private const val SEARCH_DELAY_TIME = 300L
     }
 }

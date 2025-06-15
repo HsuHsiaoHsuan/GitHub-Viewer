@@ -37,12 +37,20 @@ class UserListAdapter(private val onClick: (User, Int) -> Unit) :
         private val binding: ItemUserListBinding,
         val onClick: (User, Int) -> Unit
     ) : RecyclerView.ViewHolder(binding.root) {
+        private var currentUser: User? = null
+        private var avatarPlaceholder: Int = 0
+
+        init {
+            binding.root.setOnClickListener {
+                currentUser?.let { user ->
+                    onClick(user, avatarPlaceholder)
+                }
+            }
+        }
 
         fun bind(data: User) {
-            val avatarPlaceholder = AvatarUtils.getRandomAvatarPlaceholder()
-            binding.root.setOnClickListener {
-                onClick(data, avatarPlaceholder)
-            }
+            currentUser = data
+            avatarPlaceholder = AvatarUtils.getRandomAvatarPlaceholder()
             Glide.with(binding.imageAvatar)
                 .load(data.avatarUrl)
                 .centerCrop()
@@ -56,10 +64,10 @@ class UserListAdapter(private val onClick: (User, Int) -> Unit) :
 
 object UserDiffCallback : DiffUtil.ItemCallback<User>() {
     override fun areItemsTheSame(oldItem: User, newItem: User): Boolean {
-        return oldItem == newItem
+        return oldItem.id == newItem.id
     }
 
     override fun areContentsTheSame(oldItem: User, newItem: User): Boolean {
-        return oldItem.id == newItem.id
+        return oldItem == newItem
     }
 }
