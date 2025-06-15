@@ -41,19 +41,17 @@ class ProfileViewModel @Inject constructor(
 
     @OptIn(ExperimentalCoroutinesApi::class)
     val repositories: Flow<PagingData<Repository>> = _loadRepositoriesEvent
-        .flatMapLatest {
+        .flatMapLatest { request ->
             getRepositoryUseCase(
                 GetRepositoryRequestParams(
-                    username = it.username,
-                    type = it.type,
-                    sort = it.sort,
-                    direction = it.direction,
-                    perPage = it.perPage,
-                    page = it.page
+                    username = request.username,
+                    type = request.type,
+                    sort = request.sort,
+                    direction = request.direction,
+                    perPage = request.perPage,
+                    page = request.page
                 )
-            ).map { pageData ->
-                pageData.filter { it.fork == false }
-            }
+            )
         }
         .cachedIn(viewModelScope)
 

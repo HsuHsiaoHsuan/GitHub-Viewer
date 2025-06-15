@@ -23,7 +23,7 @@ class RepositoryListAdapter(private val onClick: (Repository) -> Unit) :
         holder: RepositoryViewHolder,
         position: Int
     ) {
-        var repository = getItem(position)
+        val repository = getItem(position)
         if (repository != null) {
             holder.bind(repository)
         }
@@ -33,11 +33,16 @@ class RepositoryListAdapter(private val onClick: (Repository) -> Unit) :
         private val binding: ItemRepositoryListBinding,
         val onClick: (Repository) -> Unit
     ) : RecyclerView.ViewHolder(binding.root) {
+        private var currentRepository: Repository? = null
+
+        init {
+            binding.root.setOnClickListener {
+                currentRepository?.let { onClick(it) }
+            }
+        }
 
         fun bind(data: Repository) {
-            binding.root.setOnClickListener {
-                onClick(data)
-            }
+            currentRepository = data
             binding.textRepositoryTitle.text = data.name
             binding.textRepositoryStarCount.text = data.stargazersCount.toString()
             binding.textRepositoryDescription.text = data.description
@@ -48,11 +53,11 @@ class RepositoryListAdapter(private val onClick: (Repository) -> Unit) :
 
     object RepositoryDiffCallback : DiffUtil.ItemCallback<Repository>() {
         override fun areItemsTheSame(oldItem: Repository, newItem: Repository): Boolean {
-            return oldItem == newItem
+            return oldItem.id == newItem.id
         }
 
         override fun areContentsTheSame(oldItem: Repository, newItem: Repository): Boolean {
-            return oldItem.id == newItem.id
+            return oldItem == newItem
         }
     }
 }

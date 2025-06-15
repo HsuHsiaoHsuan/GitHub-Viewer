@@ -15,10 +15,10 @@ import androidx.lifecycle.repeatOnLifecycle
 import androidx.navigation.fragment.navArgs
 import com.bumptech.glide.Glide
 import com.bumptech.glide.load.resource.drawable.DrawableTransitionOptions
-import com.google.android.material.appbar.AppBarLayout
 import dagger.hilt.android.AndroidEntryPoint
 import idv.hsu.githubviewer.R
 import idv.hsu.githubviewer.databinding.FragmentProfileBinding
+import idv.hsu.githubviewer.domain.model.User
 import kotlinx.coroutines.flow.collectLatest
 import kotlinx.coroutines.launch
 
@@ -68,30 +68,37 @@ class ProfileFragment : Fragment() {
     private fun observeData() {
         viewLifecycleOwner.lifecycleScope.launch {
             viewLifecycleOwner.repeatOnLifecycle(Lifecycle.State.STARTED) {
-                viewModel.stateFlow.collect { state ->
-                    when (state) {
-                        is ProfileListUiState.Idle -> Unit
+                launch {
+                    viewModel.stateFlow.collect { state ->
+                        when (state) {
+                            is ProfileListUiState.Idle -> Unit
 
-                        is ProfileListUiState.SuccessUser -> {
-                            Glide.with(binding.imageAvatar)
-                                .load(state.user.avatarUrl)
-                                .circleCrop()
-                                .transition(DrawableTransitionOptions.withCrossFade())
-                                .into(binding.imageAvatar)
-                            Glide.with(binding.imageAvatarCollapsed)
-                                .load(state.user.avatarUrl)
-                                .circleCrop()
-                                .transition(DrawableTransitionOptions.withCrossFade())
-                                .into(binding.imageAvatarCollapsed)
-                            binding.textName.text = state.user.name
-                            binding.textNameCollapsed.text = state.user.name
-                            binding.textLoginName.text =
-                                getString(R.string.format_login_name, state.user.login)
-                            binding.textFollowersCount.text = state.user.followers.toString()
-                            binding.textFollowingCount.text = state.user.following.toString()
+                            is ProfileListUiState.SuccessUser -> {
+                                updateUserInfo(state.user)
+                            }
+
+                            is ProfileListUiState.ErrorUser -> Unit
                         }
+                    }
+                }
 
-                        is ProfileListUiState.ErrorUser -> Unit
+                launch {
+                    repositoryListAdapter.loadStateFlow.collectLatest { loadStates ->
+                        binding.progressBar.isVisible =
+                            loadStates.refresh is androidx.paging.LoadState.Loading
+
+                        val errorState = loadStates.source.append as? androidx.paging.LoadState.Error
+                            ?: loadStates.source.prepend as? androidx.paging.LoadState.Error
+                            ?: loadStates.append as? androidx.paging.LoadState.Error
+                            ?: loadStates.prepend as? androidx.paging.LoadState.Error
+                            ?: loadStates.refresh as? androidx.paging.LoadState.Error
+                        errorState?.let {
+                            Toast.makeText(
+                                requireContext(),
+                                "Error: ${it.error.localizedMessage}",
+                                Toast.LENGTH_LONG
+                            ).show()
+                        }
                     }
                 }
             }
@@ -104,32 +111,28 @@ class ProfileFragment : Fragment() {
         }
     }
 
+    private fun updateUserInfo(user: User) {
+        Glide.with(this)
+            .load(user.avatarUrl)
+            .circleCrop()
+            .transition(DrawableTransitionOptions.withCrossFade())
+            .into(binding.imageAvatar)
+        Glide.with(this)
+            .load(user.avatarUrl)
+            .circleCrop()
+            .transition(DrawableTransitionOptions.withCrossFade())
+            .into(binding.imageAvatarCollapsed)
+        binding.textName.text = user.name
+        binding.textNameCollapsed.text = user.name
+        binding.textLoginName.text = getString(R.string.format_login_name, user.login)
+        binding.textFollowersCount.text = user.followers.toString()
+        binding.textFollowingCount.text = user.following.toString()
+    }
+
     private fun setRepositoryListAdapter() {
         binding.recyclerViewRepositories.apply {
             layoutManager = androidx.recyclerview.widget.LinearLayoutManager(context)
             adapter = repositoryListAdapter
-        }
-
-        viewLifecycleOwner.lifecycleScope.launch {
-            viewLifecycleOwner.repeatOnLifecycle(Lifecycle.State.STARTED) {
-                repositoryListAdapter.loadStateFlow.collectLatest { loadStates ->
-                    binding.progressBar.isVisible =
-                        loadStates.refresh is androidx.paging.LoadState.Loading
-
-                    val errorState = loadStates.source.append as? androidx.paging.LoadState.Error
-                        ?: loadStates.source.prepend as? androidx.paging.LoadState.Error
-                        ?: loadStates.append as? androidx.paging.LoadState.Error
-                        ?: loadStates.prepend as? androidx.paging.LoadState.Error
-                        ?: loadStates.refresh as? androidx.paging.LoadState.Error
-                    errorState?.let {
-                        Toast.makeText(
-                            requireContext(),
-                            "Error: ${it.error.localizedMessage}",
-                            Toast.LENGTH_LONG
-                        ).show()
-                    }
-                }
-            }
         }
     }
 
@@ -139,34 +142,31 @@ class ProfileFragment : Fragment() {
     }
 
     private fun setOnOffsetChangedListener() {
-        val animateDuration = 200L
-        binding.appBarLayout.addOnOffsetChangedListener(AppBarLayout.OnOffsetChangedListener { appBar, verticalOffset ->
+        binding.appBarLayout.addOnOffsetChangedListener { appBar, verticalOffset ->
             val totalScrollRange = appBar.totalScrollRange
-            val percentage = (kotlin.math.abs(verticalOffset).toFloat() / totalScrollRange)
+            if (totalScrollRange == 0) return@addOnOffsetChangedListener
 
-            if (percentage >= 0.8) {
-                with(binding.collapsedProfileHeader) {
-                    if (this.visibility != View.VISIBLE) {
-                        this.alpha = 0f
-                        this.visibility = View.VISIBLE
-                        this.animate().alpha(1f).duration = animateDuration
-                    }
+            val percentage = (kotlin.math.abs(verticalOffset).toFloat() / totalScrollRange)
+            val showCollapsedHeader = percentage >= COLLAPSED_HEADER_THRESHOLD
+            val expandedComponentAlpha = if (showCollapsedHeader) 0f else 1f - percentage
+
+            if (showCollapsedHeader) {
+                if (binding.collapsedProfileHeader.visibility != View.VISIBLE) {
+                    binding.collapsedProfileHeader.alpha = 0f
+                    binding.collapsedProfileHeader.visibility = View.VISIBLE
+                    binding.collapsedProfileHeader.animate().alpha(1f).duration =
+                        HEADER_ANIMATION_DURATION
                 }
-                setComponentAlpha(0f)
             } else {
-                with(binding.collapsedProfileHeader) {
-                    if (this.visibility != View.GONE) {
-                        this.animate().alpha(0f).withEndAction {
-                            this.visibility = View.GONE
-                        }.duration = animateDuration
-                    }
-                }
-                setComponentAlpha(1f - percentage)
-                if (verticalOffset == 0) {
-                    setComponentAlpha(1f)
+                if (binding.collapsedProfileHeader.visibility != View.GONE) {
+                    binding.collapsedProfileHeader.animate().alpha(0f).withEndAction {
+                        binding.collapsedProfileHeader.visibility = View.GONE
+                    }.duration = HEADER_ANIMATION_DURATION
                 }
             }
-        })
+
+            setComponentAlpha(expandedComponentAlpha.coerceIn(0f, 1f))
+        }
     }
 
     private fun setComponentAlpha(alpha: Float) {
@@ -176,5 +176,10 @@ class ProfileFragment : Fragment() {
         binding.layoutUserFollowers.alpha = alpha
         binding.layoutUserFollowing.alpha = alpha
         binding.textRepositoryTitle.alpha = alpha
+    }
+
+    companion object {
+        private const val COLLAPSED_HEADER_THRESHOLD = 0.8f
+        private const val HEADER_ANIMATION_DURATION = 200L
     }
 }
