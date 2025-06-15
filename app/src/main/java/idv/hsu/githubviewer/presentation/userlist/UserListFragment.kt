@@ -30,7 +30,15 @@ class UserListFragment : Fragment() {
     private val binding get() = _binding!!
 
     private val viewModel: UserListViewModel by viewModels()
-    private lateinit var userListAdapter: UserListAdapter
+    private val userListAdapter by lazy {
+        UserListAdapter { user, avatarPlaceholder ->
+            val action = UserListFragmentDirections.actionUserListFragmentToProfileFragment(
+                user,
+                avatarPlaceholder
+            )
+            findNavController().navigate(action)
+        }
+    }
     private var debounceJob: Job? = null
 
     override fun onCreateView(
@@ -43,11 +51,19 @@ class UserListFragment : Fragment() {
 
     override fun onViewCreated(view: View, savedInstanceState: Bundle?) {
         super.onViewCreated(view, savedInstanceState)
-
+        observeData()
         setupMainRecyclerView()
         startPaging()
         setupSearchFunction()
+    }
 
+    override fun onDestroyView() {
+        super.onDestroyView()
+        debounceJob?.cancel()
+        _binding = null
+    }
+
+    private fun observeData() {
         viewLifecycleOwner.lifecycleScope.launch {
             viewLifecycleOwner.repeatOnLifecycle(Lifecycle.State.STARTED) {
                 userListAdapter.loadStateFlow.collectLatest { loadStates ->
@@ -68,8 +84,16 @@ class UserListFragment : Fragment() {
                 }
             }
         }
+    }
 
-
+    private fun setupMainRecyclerView() {
+        binding.recyclerView.apply {
+            layoutManager = androidx.recyclerview.widget.LinearLayoutManager(context)
+            adapter = userListAdapter
+        }
+        binding.recyclerView.adapter = userListAdapter.withLoadStateFooter(
+            footer = UserLoadStateAdapter { userListAdapter.retry() }
+        )
     }
 
     private fun startPaging() {
@@ -110,26 +134,5 @@ class UserListFragment : Fragment() {
             override fun beforeTextChanged(s: CharSequence?, start: Int, count: Int, after: Int) {}
             override fun onTextChanged(s: CharSequence?, start: Int, before: Int, count: Int) {}
         })
-    }
-
-    override fun onDestroyView() {
-        super.onDestroyView()
-        _binding = null
-    }
-
-    private fun setupMainRecyclerView() {
-        userListAdapter = UserListAdapter { user, avatarPlaceholder ->
-            val action = UserListFragmentDirections.actionUserListFragmentToProfileFragment(
-                user,
-                avatarPlaceholder
-            )
-            findNavController().navigate(action)
-        }
-        binding.recyclerView.apply {
-            layoutManager = androidx.recyclerview.widget.LinearLayoutManager(context)
-            adapter = userListAdapter.withLoadStateFooter(
-                footer = UserLoadStateAdapter { userListAdapter.retry() }
-            )
-        }
     }
 }

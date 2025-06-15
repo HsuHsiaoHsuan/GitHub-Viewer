@@ -31,7 +31,15 @@ class ProfileFragment : Fragment() {
     private val viewModel: ProfileViewModel by viewModels()
     private val args: ProfileFragmentArgs by navArgs()
 
-    private lateinit var repositoryListAdapter: RepositoryListAdapter
+    private val repositoryListAdapter by lazy {
+        RepositoryListAdapter { repository ->
+            repository.htmlUrl.let { url ->
+                val customTabsIntent =
+                    androidx.browser.customtabs.CustomTabsIntent.Builder().build()
+                customTabsIntent.launchUrl(requireContext(), url.toUri())
+            }
+        }
+    }
 
     override fun onCreateView(
         inflater: LayoutInflater, container: ViewGroup?,
@@ -43,12 +51,21 @@ class ProfileFragment : Fragment() {
 
     override fun onViewCreated(view: View, savedInstanceState: Bundle?) {
         super.onViewCreated(view, savedInstanceState)
-
-        setRepositoryListAdapter()
         binding.imageAvatar.setImageResource(args.avatarPlaceholder)
         binding.imageAvatarCollapsed.setImageResource(args.avatarPlaceholder)
-        setOnOffsetChangedListener()
 
+        observeData()
+        setRepositoryListAdapter()
+        startFetchData()
+        setOnOffsetChangedListener()
+    }
+
+    override fun onDestroyView() {
+        super.onDestroyView()
+        _binding = null
+    }
+
+    private fun observeData() {
         viewLifecycleOwner.lifecycleScope.launch {
             viewLifecycleOwner.repeatOnLifecycle(Lifecycle.State.STARTED) {
                 viewModel.stateFlow.collect { state ->
@@ -85,6 +102,13 @@ class ProfileFragment : Fragment() {
                 repositoryListAdapter.submitData(pagingData)
             }
         }
+    }
+
+    private fun setRepositoryListAdapter() {
+        binding.recyclerViewRepositories.apply {
+            layoutManager = androidx.recyclerview.widget.LinearLayoutManager(context)
+            adapter = repositoryListAdapter
+        }
 
         viewLifecycleOwner.lifecycleScope.launch {
             viewLifecycleOwner.repeatOnLifecycle(Lifecycle.State.STARTED) {
@@ -107,14 +131,11 @@ class ProfileFragment : Fragment() {
                 }
             }
         }
-
-        viewModel.sendIntent(ProfileUiIntent.FetchUserById)
-        viewModel.sendIntent(ProfileUiIntent.FetchRepository())
     }
 
-    override fun onDestroyView() {
-        super.onDestroyView()
-        _binding = null
+    private fun startFetchData() {
+        viewModel.sendIntent(ProfileUiIntent.FetchUserById)
+        viewModel.sendIntent(ProfileUiIntent.FetchRepository())
     }
 
     private fun setOnOffsetChangedListener() {
@@ -155,19 +176,5 @@ class ProfileFragment : Fragment() {
         binding.layoutUserFollowers.alpha = alpha
         binding.layoutUserFollowing.alpha = alpha
         binding.textRepositoryTitle.alpha = alpha
-    }
-
-    private fun setRepositoryListAdapter() {
-        repositoryListAdapter = RepositoryListAdapter { repository ->
-            repository.htmlUrl.let { url ->
-                val customTabsIntent =
-                    androidx.browser.customtabs.CustomTabsIntent.Builder().build()
-                customTabsIntent.launchUrl(requireContext(), url.toUri())
-            }
-        }
-        binding.recyclerViewRepositories.apply {
-            layoutManager = androidx.recyclerview.widget.LinearLayoutManager(context)
-            adapter = repositoryListAdapter
-        }
     }
 }
