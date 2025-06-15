@@ -18,6 +18,7 @@ import androidx.paging.LoadState
 import androidx.paging.PagingData
 import dagger.hilt.android.AndroidEntryPoint
 import idv.hsu.githubviewer.databinding.FragmentUserListBinding
+import idv.hsu.githubviewer.domain.model.User
 import kotlinx.coroutines.Job
 import kotlinx.coroutines.delay
 import kotlinx.coroutines.flow.collectLatest
@@ -39,7 +40,8 @@ class UserListFragment : Fragment() {
             findNavController().navigate(action)
         }
     }
-    private var debounceJob: Job? = null
+
+    private var searchJob: Job? = null
 
     override fun onCreateView(
         inflater: LayoutInflater, container: ViewGroup?,
@@ -53,17 +55,25 @@ class UserListFragment : Fragment() {
         super.onViewCreated(view, savedInstanceState)
         observeData()
         setupMainRecyclerView()
-        startPaging()
+        if (userListAdapter.itemCount == 0) {
+            startFetchData()
+        }
         setupSearchFunction()
     }
 
     override fun onDestroyView() {
         super.onDestroyView()
-        debounceJob?.cancel()
+        searchJob?.cancel()
         _binding = null
     }
 
     private fun observeData() {
+        viewLifecycleOwner.lifecycleScope.launch {
+            viewModel.users.collectLatest { pagingData ->
+                userListAdapter.submitData(pagingData)
+            }
+        }
+
         viewLifecycleOwner.lifecycleScope.launch {
             viewLifecycleOwner.repeatOnLifecycle(Lifecycle.State.STARTED) {
                 userListAdapter.loadStateFlow.collectLatest { loadStates ->
@@ -96,37 +106,35 @@ class UserListFragment : Fragment() {
         )
     }
 
-    private fun startPaging() {
-        debounceJob?.cancel()
-        debounceJob = viewLifecycleOwner.lifecycleScope.launch {
-            viewModel.users.collectLatest { pagingData ->
-                userListAdapter.submitData(pagingData)
-            }
-        }
+    private fun startFetchData() {
         viewModel.sendIntent(UserListUiIntent.FetchData())
     }
 
     private fun setupSearchFunction() {
         binding.textInput.addTextChangedListener(object : TextWatcher {
             override fun afterTextChanged(s: Editable?) {
+                if (viewModel.lastKeyword == s.toString()) return
+
                 val keyword = s.toString().trim()
-                debounceJob?.cancel()
-                debounceJob = viewLifecycleOwner.lifecycleScope.launch {
-                    delay(300)
-                    if (keyword.isEmpty()) {
-                        binding.groupSearchEmpty.isVisible = false
-                        startPaging()
-                    } else {
-                        debounceJob?.cancel()
-                        val filteredList = userListAdapter.snapshot()
-                            .filterNotNull()
-                            .filter { it.login.contains(keyword, ignoreCase = true) }
-
-                        binding.groupSearchEmpty.isVisible = filteredList.isEmpty()
-
-                        lifecycleScope.launch {
-                            userListAdapter.submitData(PagingData.from(filteredList))
+                viewModel.sendIntent(UserListUiIntent.SetSearchKeyword(keyword))
+                searchJob?.cancel()
+                if (keyword.isEmpty()) {
+                    viewModel.sendIntent(UserListUiIntent.SetSnapShotList(null))
+                    binding.groupSearchEmpty.isVisible = false
+                    startFetchData()
+                } else {
+                    searchJob = viewLifecycleOwner.lifecycleScope.launch {
+                        delay(300)
+                        if (viewModel.snapshotList == null) {
+                            viewModel.sendIntent(
+                                UserListUiIntent.SetSnapShotList(userListAdapter.snapshot())
+                            )
                         }
+                        val filteredList: List<User> = viewModel.snapshotList
+                            ?.filter { it?.login?.contains(keyword, ignoreCase = true) == true }
+                            ?.filterNotNull() ?: listOf()
+                        binding.groupSearchEmpty.isVisible = filteredList.isEmpty()
+                        userListAdapter.submitData(PagingData.from(filteredList))
                     }
                 }
             }
