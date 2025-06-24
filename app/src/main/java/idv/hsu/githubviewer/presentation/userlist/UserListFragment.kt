@@ -18,6 +18,7 @@ import androidx.paging.LoadState
 import androidx.paging.PagingData
 import dagger.hilt.android.AndroidEntryPoint
 import idv.hsu.githubviewer.databinding.FragmentUserListBinding
+import idv.hsu.githubviewer.domain.model.User
 import kotlinx.coroutines.Job
 import kotlinx.coroutines.delay
 import kotlinx.coroutines.flow.collectLatest
@@ -30,8 +31,17 @@ class UserListFragment : Fragment() {
     private val binding get() = _binding!!
 
     private val viewModel: UserListViewModel by viewModels()
-    private lateinit var userListAdapter: UserListAdapter
-    private var debounceJob: Job? = null
+    private val userListAdapter by lazy {
+        UserListAdapter { user, avatarPlaceholder ->
+            val action = UserListFragmentDirections.actionUserListFragmentToProfileFragment(
+                user,
+                avatarPlaceholder
+            )
+            findNavController().navigate(action)
+        }
+    }
+
+    private var searchJob: Job? = null
 
     override fun onCreateView(
         inflater: LayoutInflater, container: ViewGroup?,
@@ -43,10 +53,26 @@ class UserListFragment : Fragment() {
 
     override fun onViewCreated(view: View, savedInstanceState: Bundle?) {
         super.onViewCreated(view, savedInstanceState)
-
+        observeData()
         setupMainRecyclerView()
-        startPaging()
+        if (userListAdapter.itemCount == 0) {
+            startFetchData()
+        }
         setupSearchFunction()
+    }
+
+    override fun onDestroyView() {
+        super.onDestroyView()
+        searchJob?.cancel()
+        _binding = null
+    }
+
+    private fun observeData() {
+        viewLifecycleOwner.lifecycleScope.launch {
+            viewModel.users.collectLatest { pagingData ->
+                userListAdapter.submitData(pagingData)
+            }
+        }
 
         viewLifecycleOwner.lifecycleScope.launch {
             viewLifecycleOwner.repeatOnLifecycle(Lifecycle.State.STARTED) {
@@ -68,63 +94,9 @@ class UserListFragment : Fragment() {
                 }
             }
         }
-
-
-    }
-
-    private fun startPaging() {
-        debounceJob?.cancel()
-        debounceJob = viewLifecycleOwner.lifecycleScope.launch {
-            viewModel.users.collectLatest { pagingData ->
-                userListAdapter.submitData(pagingData)
-            }
-        }
-        viewModel.sendIntent(UserListUiIntent.FetchData())
-    }
-
-    private fun setupSearchFunction() {
-        binding.textInput.addTextChangedListener(object : TextWatcher {
-            override fun afterTextChanged(s: Editable?) {
-                val keyword = s.toString().trim()
-                debounceJob?.cancel()
-                debounceJob = viewLifecycleOwner.lifecycleScope.launch {
-                    delay(300)
-                    if (keyword.isEmpty()) {
-                        binding.groupSearchEmpty.isVisible = false
-                        startPaging()
-                    } else {
-                        debounceJob?.cancel()
-                        val filteredList = userListAdapter.snapshot()
-                            .filterNotNull()
-                            .filter { it.login.contains(keyword, ignoreCase = true) }
-
-                        binding.groupSearchEmpty.isVisible = filteredList.isEmpty()
-
-                        lifecycleScope.launch {
-                            userListAdapter.submitData(PagingData.from(filteredList))
-                        }
-                    }
-                }
-            }
-
-            override fun beforeTextChanged(s: CharSequence?, start: Int, count: Int, after: Int) {}
-            override fun onTextChanged(s: CharSequence?, start: Int, before: Int, count: Int) {}
-        })
-    }
-
-    override fun onDestroyView() {
-        super.onDestroyView()
-        _binding = null
     }
 
     private fun setupMainRecyclerView() {
-        userListAdapter = UserListAdapter { user, avatarPlaceholder ->
-            val action = UserListFragmentDirections.actionUserListFragmentToProfileFragment(
-                user,
-                avatarPlaceholder
-            )
-            findNavController().navigate(action)
-        }
         binding.recyclerView.apply {
             layoutManager = androidx.recyclerview.widget.LinearLayoutManager(context)
             adapter = userListAdapter
@@ -132,5 +104,43 @@ class UserListFragment : Fragment() {
         binding.recyclerView.adapter = userListAdapter.withLoadStateFooter(
             footer = UserLoadStateAdapter { userListAdapter.retry() }
         )
+    }
+
+    private fun startFetchData() {
+        viewModel.sendIntent(UserListUiIntent.FetchData())
+    }
+
+    private fun setupSearchFunction() {
+        binding.textInput.addTextChangedListener(object : TextWatcher {
+            override fun afterTextChanged(s: Editable?) {
+                if (viewModel.lastKeyword == s.toString()) return
+
+                val keyword = s.toString().trim()
+                viewModel.sendIntent(UserListUiIntent.SetSearchKeyword(keyword))
+                searchJob?.cancel()
+                if (keyword.isEmpty()) {
+                    viewModel.sendIntent(UserListUiIntent.SetSnapShotList(null))
+                    binding.groupSearchEmpty.isVisible = false
+                    startFetchData()
+                } else {
+                    searchJob = viewLifecycleOwner.lifecycleScope.launch {
+                        delay(300)
+                        if (viewModel.snapshotList == null) {
+                            viewModel.sendIntent(
+                                UserListUiIntent.SetSnapShotList(userListAdapter.snapshot())
+                            )
+                        }
+                        val filteredList: List<User> = viewModel.snapshotList
+                            ?.filter { it?.login?.contains(keyword, ignoreCase = true) == true }
+                            ?.filterNotNull() ?: listOf()
+                        binding.groupSearchEmpty.isVisible = filteredList.isEmpty()
+                        userListAdapter.submitData(PagingData.from(filteredList))
+                    }
+                }
+            }
+
+            override fun beforeTextChanged(s: CharSequence?, start: Int, count: Int, after: Int) {}
+            override fun onTextChanged(s: CharSequence?, start: Int, before: Int, count: Int) {}
+        })
     }
 }
