@@ -37,4 +37,9 @@ abstract class MVIViewModel<UiIntent, UiState>(
     suspend fun setUiState(uiState: UiState) {
         _state.emit(uiState)
     }
+
+    override fun onCleared() {
+        super.onCleared()
+        _intentChannel.close()
+    }
 }

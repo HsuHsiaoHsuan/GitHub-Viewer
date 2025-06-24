@@ -26,6 +26,7 @@ class UserLoadStateAdapter(private val retry: () -> Unit) :
         init {
             binding.retryButton.setOnClickListener { retry.invoke() }
         }
+
         fun bind(loadState: LoadState) {
             binding.progressBar.isVisible = loadState is LoadState.Loading
             binding.retryButton.isVisible = loadState is LoadState.Error
