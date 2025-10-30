@@ -27,15 +27,10 @@ class GitHubRepositoryPagingSource(
     override suspend fun load(params: LoadParams<Int>): LoadResult<Int, RepositoryDto> {
         return try {
             val currentPageNumber = params.key ?: page
-            val response = gitHubApiService.getUserRepositories(
+            val repositories = gitHubApiService.getUserRepositories(
                 username, type, sort, direction, perPage, currentPageNumber
             )
 
-            if (!response.isSuccessful) {
-                return LoadResult.Error(HttpException(response))
-            }
-
-            val repositories = response.body().orEmpty()
             val nextKey = if (repositories.isEmpty()) {
                 null
             } else {

@@ -45,6 +45,8 @@ class GitHubRepositoryImpl @Inject constructor(
         }
     }
 
+    // TODO : RemoteMediator
+    // https://developer.android.com/topic/libraries/architecture/paging/v3-network-db
     override fun getUsersStream(since: Int, perPage: Int): Flow<PagingData<User>> {
         return Pager(
             config = PagingConfig(
@@ -61,8 +63,8 @@ class GitHubRepositoryImpl @Inject constructor(
             }
     }
 
-    override fun getUserById(id: String): Flow<DomainResult<User>> {
-        return remoteDataSource.getUserById(id)
+    override fun getUserById(username: String): Flow<DomainResult<User>> {
+        return remoteDataSource.getUserById(username)
             .map { apiResultWrapper ->
                 when (apiResultWrapper) {
                     is ApiResultWrapper.Success -> {

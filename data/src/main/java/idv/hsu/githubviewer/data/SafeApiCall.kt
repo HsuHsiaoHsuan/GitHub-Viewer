@@ -10,11 +10,10 @@ import retrofit2.HttpException
 import retrofit2.Response
 
 inline fun <T> safeApiCall(
-    crossinline apiCall: suspend () -> Response<T>
+    crossinline apiCall: suspend () -> T
 ): Flow<ApiResultWrapper<T>> = flow<ApiResultWrapper<T>> {
     val response = apiCall()
-    if (response.isSuccessful) emit(ApiResultWrapper.Success(response.body()!!))
-    else throw HttpException(response)
+    emit(ApiResultWrapper.Success(response))
 }.catch { throwable ->
     val result = when (throwable) {
         is IOException -> ApiResultWrapper.NetworkError

@@ -16,7 +16,7 @@ interface GitHubApiService {
     suspend fun getUsers(
         @Query("since") since: Int = 0,
         @Query("per_page") perPage: Int? = null
-    ): Response<List<UserDto>>
+    ): List<UserDto>
 
     /**
      * https://docs.github.com/en/rest/users/users?apiVersion=2022-11-28#get-a-user-using-their-id
@@ -24,7 +24,7 @@ interface GitHubApiService {
     @GET("/user/{id}")
     suspend fun getUserById(
         @Path("id") id: String
-    ): Response<UserDto>
+    ): UserDto
 
     /**
      * https://docs.github.com/en/rest/repos/repos?apiVersion=2022-11-28#list-repositories-for-a-user
@@ -38,5 +38,5 @@ interface GitHubApiService {
         @Query("direction") direction: String? = null,
         @Query("per_page") perPage: Int? = null,
         @Query("page") page: Int? = null
-    ): Response<List<RepositoryDto>>
+    ): List<RepositoryDto>
 }

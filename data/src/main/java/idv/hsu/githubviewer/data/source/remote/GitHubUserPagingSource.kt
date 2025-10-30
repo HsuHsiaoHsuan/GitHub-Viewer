@@ -22,16 +22,11 @@ class GitHubUserPagingSource(
     override suspend fun load(params: LoadParams<Int>): LoadResult<Int, UserDto> {
         return try {
             val currentSinceId = params.key ?: since
-            val response = gitHubApiService.getUsers(
+            val users = gitHubApiService.getUsers(
                 since = currentSinceId,
                 perPage = params.loadSize
             )
 
-            if (!response.isSuccessful) {
-                return LoadResult.Error(HttpException(response))
-            }
-
-            val users = response.body().orEmpty()
             val nextKey = if (users.isEmpty()) {
                 null
             } else {

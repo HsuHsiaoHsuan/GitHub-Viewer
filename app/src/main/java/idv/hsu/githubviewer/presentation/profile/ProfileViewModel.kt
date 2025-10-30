@@ -100,6 +100,11 @@ class ProfileViewModel @Inject constructor(
             _loadRepositoriesEvent.emit(params)
         }
     }
+
+    override fun onCleared() {
+        super.onCleared()
+        fetchUserJob?.cancel() // 不需要，因為是 viewModelScope 的子 Job
+    }
 }
 
 sealed class ProfileUiIntent {

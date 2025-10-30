@@ -5,6 +5,7 @@ plugins {
     alias(libs.plugins.kotlin.android)
     alias(libs.plugins.hilt.android)
     alias(libs.plugins.ksp)
+    alias(libs.plugins.android.junit5)
 }
 
 android {
@@ -64,6 +65,7 @@ dependencies {
     implementation(libs.bundles.network)
     ksp(libs.moshi.codegen)
 
+    testImplementation(libs.coroutines.test)
     testImplementation(libs.junit5.api)
     testRuntimeOnly(libs.junit5.engine)
     testImplementation(libs.mockk)
