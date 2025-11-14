@@ -9,12 +9,31 @@ import okio.IOException
 import retrofit2.HttpException
 import retrofit2.Response
 
+const val HTTP_NO_CONTENT = 204
+
 inline fun <T> safeApiCall(
     crossinline apiCall: suspend () -> Response<T>
 ): Flow<ApiResultWrapper<T>> = flow<ApiResultWrapper<T>> {
     val response = apiCall()
-    if (response.isSuccessful) emit(ApiResultWrapper.Success(response.body()!!))
-    else throw HttpException(response)
+    if (response.isSuccessful) {
+        when (response.code()) {
+            HTTP_NO_CONTENT -> {
+                @Suppress("UNCHECKED_CAST")
+                val noContentValue = Unit as T
+                emit(ApiResultWrapper.Success(noContentValue))
+            }
+            else -> {
+                val body = response.body()
+                if (body != null) {
+                    emit(ApiResultWrapper.Success(body))
+                } else {
+                    emit(ApiResultWrapper.Error(-1, "empty body"))
+                }
+            }
+        }
+    } else {
+        throw HttpException(response)
+    }
 }.catch { throwable ->
     val result = when (throwable) {
         is IOException -> ApiResultWrapper.NetworkError
